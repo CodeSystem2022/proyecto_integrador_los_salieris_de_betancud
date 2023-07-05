@@ -7,6 +7,24 @@ from db.schemas.gasto import gasto_schema, gastos_schema
 #se define el router con el prefijo gastos 
 router = APIRouter(prefix="/gastos")
 
+#crear un gasto y guardar en la base de datos
+@router.post('/',response_model=Gasto,status_code=status.HTTP_201_CREATED)
+async def crear_gasto(gasto: Gasto):
+    #transformamos los datos a un diccionario para poder almacenarlo en la base de datos
+    _gasto = dict(gasto)
+    #eliminarmos el campo id ya que el mismo se genera de forma automatica al guardar en db
+    del _gasto["id"]
+    # guardamos el gasto en la base de datos y obtenemos su id
+    # Se utiliza la instancia client_db usando la base de datos app_gastos
+    id =client_db.gastos.insert_one(_gasto).inserted_id
+    
+    #se obtiene el nuevo gasto desde la base de datos buscando por el (_id) ya que utilizamos mongodb y 
+    #se convierte a un diccionario
+    nuevo_gasto = gasto_schema(client_db.gastos.find_one({"_id": id}))
+    
+    #Se crea un objeto Gasto y se retorna
+    return Gasto(**nuevo_gasto)
+
 #Retorna todos los gastos
 @router.get('/',response_model=list[Gasto], status_code=status.HTTP_200_OK)
 async def obtener_gastos():
