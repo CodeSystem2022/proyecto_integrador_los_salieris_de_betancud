@@ -1,7 +1,8 @@
 *.env
 .env
 .space
-envvenv
+.venv
 .vscode
 build
 dist
+__pycache__
