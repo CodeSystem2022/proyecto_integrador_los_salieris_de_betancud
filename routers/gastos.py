@@ -47,3 +47,21 @@ async def modificar_gasto(id:str, gasto:Gasto):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="No se elimino el gasto")
 
 
+""" Buscar en la base de datos usando como parametro de busqueda (field) y como valor (key)
+Ej. para buscar por _id buscar("_id","Id que se quiere buscar")
+Retorna un nuevo Objeto de la clase Gasto o genera una excepcion  """
+ 
+def buscar_gasto(field:str, key):
+    try:
+        return Gasto(**gasto_schema(client_db.gastos.find_one({field: key})))
+    except:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No existe el gasto")
+    
+""" Obtener el gasto segun el id de la coleccion gastos retornar status code 200 y el objecto gasto 
+en caso que no exista devolver status code 404 """
+
+@router.get('/{id}', response_model=Gasto, status_code=status.HTTP_200_OK)
+async def obtener_gasto(id:str):
+    gasto=buscar_gasto("_id",ObjectId(id))
+    return gasto
+
